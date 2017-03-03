@@ -1,14 +1,12 @@
 from flask import Flask, request, redirect
 import os
-import pymongo
-
 from pymongo import MongoClient
-client = MongoClient()
 
-db = client.test_database
+# client = MongoClient()
 
-collection = db.test_collection
+# db = client.test_database
 
+# collection = db.test_collection
 
 app = Flask(__name__)
 
