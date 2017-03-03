@@ -1,5 +1,12 @@
 from flask import Flask, request, redirect
 import os
+from pymongo import MongoClient
+
+# client = MongoClient()
+
+# db = client.test_database
+
+# collection = db.test_collection
 
 app = Flask(__name__)
 
@@ -12,3 +19,5 @@ if __name__ == "__main__":
     if port == 5000:
       app.debug = True
     app.run(host='0.0.0.0', port=port)
+
+
