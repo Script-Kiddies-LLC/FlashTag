@@ -3,12 +3,9 @@ from flask import Flask, request, redirect
 from flask_socketio import SocketIO
 from pymongo import MongoClient
 
-DB_USER = "dev"
-DB_PASS = "python"
+client = MongoClient()
 
-client = MongoClient("mongodb://{}:{}@ds157248.mlab.com:57248/flashtag".format(DB_USER, DB_PASS))
-
-db = client.test
+db = client.flashtag
 
 collection = db.test
 
@@ -19,13 +16,12 @@ socketio = SocketIO(app)
 def index():
     return "Hello World"
 
-@socketio.on('connection')
+@socketio.on('connect')
 def connection(message):
-    print "Connect!"
     valid = false
     if message.connecting:
       valid = true
-    data = []
+    data = collection.find()
     emit('connection_response', {
       'valid': valid,
       'data': data
@@ -39,7 +35,7 @@ def map_get(message):
     if message.location:
         valid = true
     # Query DB for places near that location
-    data = []
+    data = collection.find()
     # return all things near
     emit('map_response', {
       'valid': valid,
@@ -54,15 +50,17 @@ def connection(message):
     if message.marker:
       valid = true
     # Query DB for ID of marker
-    data = []
+    data = collection.find()
     # Return Marker data
     emit('marker_response', {
       'valid': valid,
       'data': data
     })
 
+@socketio.on('disconnect')
+def test_disconnect():
+    print('Client disconnected')
+
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
-    print "Magic Happening on port: {}".format(port)
-    socketio.run(app)
+    socketio.run(app, debug = True)
