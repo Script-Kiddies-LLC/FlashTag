@@ -1,16 +1,13 @@
+import os
 from flask import Flask, request, redirect
 from flask_socketio import SocketIO
-import os
 from pymongo import MongoClient
 
-DB_USER = 'dev'
-DB_PASS = 'python'
+client = MongoClient()
 
-client = MongoClient("mongodb://{}:{}@ds050879.mlab.com:50879/peopleseen".format(DB_USER, DB_PASS))
+db = client.flashtag
 
-# db = client.test_database
-
-# collection = db.test_collection
+collection = db.test
 
 app = Flask(__name__)
 socketio = SocketIO(app)
@@ -19,28 +16,51 @@ socketio = SocketIO(app)
 def index():
     return "Hello World"
 
-@socketio.on('connection')
+@socketio.on('connect')
 def connection(message):
-    emit('connection_response', {'valid': false})
+    valid = false
+    if message.connecting:
+      valid = true
+    data = collection.find()
+    emit('connection_response', {
+      'valid': valid,
+      'data': data
+    })
+
 
 @socketio.on('map_get')
 def map_get(message):
     # From message take in location
+    valid = false
+    if message.location:
+        valid = true
     # Query DB for places near that location
+    data = collection.find()
     # return all things near
-    emit('map_response', {'valid': false})
+    emit('map_response', {
+      'valid': valid,
+      'data': data
+    })
+
 
 @socketio.on('marker')
 def connection(message):
+    valid = false
     # From message take in ID
+    if message.marker:
+      valid = true
     # Query DB for ID of marker
+    data = collection.find()
     # Return Marker data
-    emit('marker_response', {'valid': false})
+    emit('marker_response', {
+      'valid': valid,
+      'data': data
+    })
 
+@socketio.on('disconnect')
+def test_disconnect():
+    print('Client disconnected')
 
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
-    if port == 5000:
-      socketio.debug = True
-    socketio.run(app)
+    socketio.run(app, debug = True)
